@@ -1,0 +1,15 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: openhukamnama-api
+    environment:
+      SELECT_USERNAME: ${SELECT_USERNAME:-sevadar}
+      SELECT_PASSWORD: ${SELECT_PASSWORD:-gursikh905}
+    ports:
+      - "80:7979"
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: uvicorn api:app --host 0.0.0.0 --port 7979 --reload
