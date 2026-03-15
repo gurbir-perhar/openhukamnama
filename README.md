@@ -8,7 +8,7 @@
 
 Open Hukamnama is a lightweight, self-hostable tool for selecting and publishing the daily Hukamnama from the Guru Granth Sahib.
 
-This project began in 2006 at Gursikh Sabha Canada in Toronto, Ontario, Canada. Its original purpose was to give the granthi a straightforward interface for selecting the daily morning prayer: the Hukamnama, traditionally taken as the first stanza on a randomly opened page from the Guru Granth Sahib.
+This project began in 2006 at Gursikh Sabha Canada in Toronto, Ontario, Canada. Its original purpose was to give the granthi a straightforward interface for selecting the daily morning prayer: the Hukamnama. Guru Granth Sahib is opened at a random page, and the Hukamnama is taken from the first Shabad (hymn) on the left-hand page.
 
 In its earliest form, the workflow was manual. A phone call would be made, and a technician would update flat files to publish the selection. Over time, that evolved into a more standalone, lightweight, mobile-friendly system that can be self-hosted and operated with much less technical involvement.
 
