@@ -7,6 +7,7 @@ services:
     environment:
       SELECT_USERNAME: ${SELECT_USERNAME:-sevadar}
       SELECT_PASSWORD: ${SELECT_PASSWORD:-gursikh905}
+      SESSION_SECRET: ${SESSION_SECRET:-change-me-in-production}
     ports:
       - "80:7979"
     volumes:

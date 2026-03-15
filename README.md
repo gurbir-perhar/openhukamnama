@@ -49,7 +49,7 @@ The project is now being open sourced and made freely available for anyone who w
 ### Selector Flow
 
 1. A user opens the selector UI in the browser.
-2. The user logs in using the configured selector credentials.
+2. The user logs in through the backend authentication endpoint using the configured selector credentials.
 3. The frontend requests shabads for a given ang/page using `GET /getShabads/{myPage}`.
 4. The user selects the desired row range.
 5. The frontend submits the selected start and end IDs to `POST /submit/`.
@@ -84,7 +84,7 @@ docker compose up --build
 Start the application with custom selector credentials:
 
 ```bash
-SELECT_USERNAME=myuser SELECT_PASSWORD=mypass docker compose up --build
+SELECT_USERNAME=myuser SELECT_PASSWORD=mypass SESSION_SECRET=replace-this docker compose up --build
 ```
 
 Once the container is running, open:
@@ -105,17 +105,19 @@ The selector UI login is configured through Docker environment variables:
 
 - `SELECT_USERNAME`
 - `SELECT_PASSWORD`
+- `SESSION_SECRET`
 
 If these are not provided, the app defaults to:
 
 ```text
 SELECT_USERNAME=sevadar
 SELECT_PASSWORD=gursikh905
+SESSION_SECRET=change-me-in-production
 ```
 
 ### Important Note About Authentication
 
-The current selector login is client-side gating for convenience. It is configurable, but it is not secure server-side authentication.
+The selector now uses backend login with a signed session cookie. `SESSION_SECRET` should be changed in any non-trivial deployment.
 
 ## Data Attribution
 
@@ -161,11 +163,11 @@ Behavior:
 Typical use:
 - Manual shabad selection workflow in the browser
 
-### `GET /select-config`
+### `POST /login`
 
-Returns the selector credentials currently configured through Docker environment variables.
+Validates selector credentials and creates a signed session cookie.
 
-Example response:
+Request body:
 
 ```json
 {
@@ -174,9 +176,41 @@ Example response:
 }
 ```
 
+Example response:
+
+```json
+{
+  "authenticated": true
+}
+```
+
 Notes:
-- Values come from `SELECT_USERNAME` and `SELECT_PASSWORD`
-- This endpoint exists so the static frontend can read its runtime config
+- Credentials are validated against `SELECT_USERNAME` and `SELECT_PASSWORD`
+- On success, the backend sets an HTTP-only session cookie
+
+### `POST /logout`
+
+Clears the current session cookie.
+
+Example response:
+
+```json
+{
+  "authenticated": false
+}
+```
+
+### `GET /session`
+
+Returns whether the current request has a valid authenticated session.
+
+Example response:
+
+```json
+{
+  "authenticated": true
+}
+```
 
 ### `GET /getShabads/{myPage}`
 
@@ -215,6 +249,9 @@ Example response:
 
 Used by:
 - The selector frontend to populate the DataTable
+
+Authentication:
+- Requires a valid session cookie
 
 ### `GET /updatedHukamnama`
 
@@ -290,6 +327,9 @@ Example response:
 
 Used by:
 - The selector frontend after the user selects rows and submits them
+
+Authentication:
+- Requires a valid session cookie
 
 ## Notes
 

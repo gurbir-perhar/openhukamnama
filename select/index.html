@@ -74,39 +74,61 @@
 
     <script>
         $(document).ready(function () {
-            let validUsername = "";
-            let validPassword = "";
-
             $('#loginForm').show();
 
-            $.getJSON('/select-config')
-                .done(function (config) {
-                    validUsername = config.username;
-                    validPassword = config.password;
+            function showLogin() {
+                $('#content').hide();
+                $('#loginForm').show();
+            }
+
+            function showContent() {
+                $('#loginForm').hide();
+                $('#content').show();
+            }
+
+            function handleUnauthorized() {
+                showLogin();
+                alert('Your session has expired. Please log in again.');
+            }
+
+            $.getJSON('/session')
+                .done(function (session) {
+                    if (session.authenticated) {
+                        showContent();
+                    } else {
+                        showLogin();
+                    }
                 })
                 .fail(function () {
-                    alert('Failed to load login configuration.');
+                    showLogin();
                 });
 
             $('#loginButton').on('click', function () {
                 const username = $('#username').val();
                 const password = $('#password').val();
 
-                if (username === validUsername && password === validPassword) {
-                    $('#loginForm').hide();
-                    $('#content').show();
-                } else {
-                    alert('Invalid credentials. Please try again.');
-                }
+                $.ajax({
+                    url: '/login',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        username: username,
+                        password: password
+                    }),
+                    success: function () {
+                        showContent();
+                    },
+                    error: function () {
+                        alert('Invalid credentials. Please try again.');
+                    }
+                });
             });
 
-            // Existing DataTable and data submission logic
             let table;
             $('#fetchData').on('click', function () {
                 const pageNumber = $('#pageNumber').val();
                 const apiUrl = `/getShabads/${pageNumber}`;
                 
-
                 $.get(apiUrl, function (data) {
                     const jsonData = data;
 
@@ -117,6 +139,11 @@
 
                     $('#tableHeaders').empty();
                     $('#tableBody').empty();
+
+                    if (!jsonData.length) {
+                        alert('No shabads found for that page.');
+                        return;
+                    }
 
                     const headers = Object.keys(jsonData[0]);
                     headers.forEach(header => {
@@ -138,10 +165,22 @@
                             style: 'multi'
                         }
                     });
+                }).fail(function (jqXHR) {
+                    if (jqXHR.status === 401) {
+                        handleUnauthorized();
+                        return;
+                    }
+
+                    alert('Failed to load shabads.');
                 });
             });
 
             $('#submitData').on('click', function () {
+                if (!table) {
+                    alert("Load shabads before submitting.");
+                    return;
+                }
+
                 const selectedData = table.rows({ selected: true }).data().toArray();
 
                 if (selectedData.length === 0) {
@@ -150,8 +189,6 @@
                 }
 
                 const firstColumnValue = selectedData[0][Object.keys(selectedData[0])[0]];
-                const numSelected = selectedData.length;
-
                 const lastRow = selectedData[selectedData.length - 1];
                 const lastColumnValue = lastRow[Object.keys(lastRow)[0]];
 
@@ -173,6 +210,11 @@
                         alert("Data submitted successfully");
                     },
                     error: function (jqXHR) {
+                        if (jqXHR.status === 401) {
+                            handleUnauthorized();
+                            return;
+                        }
+
                         console.error("Error:", jqXHR.responseText);
                         alert("Failed to submit data");
                     }
