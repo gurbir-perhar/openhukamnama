@@ -1,5 +1,9 @@
 # Open Hukamnama
 
+<p align="center">
+  <img src="assets/logo.png" alt="Open Hukamnama logo" width="220" />
+</p>
+
 ## Overview
 
 Open Hukamnama is a lightweight, self-hostable tool for selecting and publishing the daily Hukamnama from the Guru Granth Sahib.
